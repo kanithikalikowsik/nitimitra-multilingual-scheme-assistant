@@ -1,19 +1,36 @@
 import os
+import logging
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Path, Query
+from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import String, func, or_
+from fastapi.responses import JSONResponse
+from sqlalchemy import String, func, or_, text
 from sqlalchemy.orm import Session, selectinload
 
 from .categories import SCHEME_CATEGORIES, normalize_category
 from .assistant_service import answer_question
-from .database import get_db
+from .database import engine, get_db
 from .eligibility import evaluate as evaluate_eligibility, questionnaire as eligibility_questionnaire
 from .models import ApplicationStep, Document, EligibilityRule, Scheme
 from .schemas import AssistantChatRequest, AssistantChatResponse, CategoryRead, EligibilityCheckRequest, EligibilityCheckResponse, SchemeRead
 from .seed import initialize_and_seed
+
+logger = logging.getLogger(__name__)
+
+
+def configured_frontend_origins(environment: str | None = None, raw: str | None = None) -> list[str]:
+    env = (environment if environment is not None else os.getenv("APP_ENV", "development")).strip().casefold()
+    value = raw if raw is not None else os.getenv("FRONTEND_ORIGINS")
+    if value is None or not value.strip():
+        if env == "production":
+            raise RuntimeError("FRONTEND_ORIGINS must be configured in production")
+        value = "http://localhost:5173,http://127.0.0.1:5173"
+    origins = [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
+    if env == "production" and (not origins or "*" in origins):
+        raise RuntimeError("Production CORS requires explicit frontend origins")
+    return origins
 
 
 @asynccontextmanager
@@ -26,14 +43,11 @@ app = FastAPI(
     title="NitiMitra API",
     version="0.2.0",
     description="Public information service for NitiMitra. Scheme records are informational and do not make official eligibility decisions.",
+    debug=False,
     lifespan=lifespan,
 )
 
-origins = [
-    origin.strip()
-    for origin in os.getenv("FRONTEND_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
-    if origin.strip()
-]
+origins = configured_frontend_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -41,6 +55,18 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"]
 )
+
+
+@app.middleware("http")
+async def sanitized_error_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as error:
+        # Do not log exception messages or tracebacks: drivers and providers
+        # can include credentials or request content in them.
+        logger.error("Unhandled API error: method=%s path=%s error_type=%s",
+                     request.method, request.url.path, type(error).__name__)
+        return JSONResponse(status_code=500, content={"detail": "An internal server error occurred."})
 
 
 def _scheme_query(db: Session):
@@ -55,6 +81,17 @@ def _scheme_query(db: Session):
 @app.get("/health", tags=["health"])
 def health_check():
     return {"status": "ok", "service": "nitimitra-api"}
+
+
+@app.get("/health/ready", tags=["health"])
+def readiness_check():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except Exception as error:
+        logger.error("Database readiness check failed: error_type=%s", type(error).__name__)
+        raise HTTPException(status_code=503, detail="Database is unavailable") from None
+    return {"status": "ok", "database": "available"}
 
 
 @app.get("/api/categories", response_model=list[CategoryRead], tags=["schemes"])

@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import JSON, MetaData, Table, inspect, insert, select
 from sqlalchemy.orm import Session
 
@@ -147,10 +149,21 @@ def seed_demo_data(db: Session) -> None:
 
 
 def initialize_and_seed() -> None:
-    Base.metadata.create_all(bind=engine)
-    migrate_legacy_schema(engine)
-    with SessionLocal() as db:
-        seed_demo_data(db)
+    """Initialize local SQLite compatibly; production schema is managed by Alembic."""
+    production = os.getenv("APP_ENV", "development").strip().casefold() == "production"
+    if engine.dialect.name == "sqlite" and not production:
+        Base.metadata.create_all(bind=engine)
+        migrate_legacy_schema(engine)
+
+    seed_setting = os.getenv("SEED_DEMO_DATA")
+    seed_enabled = (
+        seed_setting.strip().casefold() in {"1", "true", "yes", "on"}
+        if seed_setting is not None
+        else not production
+    )
+    if seed_enabled:
+        with SessionLocal() as db:
+            seed_demo_data(db)
 
 
 if __name__ == "__main__":

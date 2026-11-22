@@ -24,6 +24,9 @@ class EligibilityApiTests(unittest.TestCase):
             health = client.get("/health")
             self.assertEqual(health.status_code, 200)
             self.assertEqual(health.json()["status"], "ok")
+            ready = client.get("/health/ready")
+            self.assertEqual(ready.status_code, 200)
+            self.assertEqual(ready.json(), {"status": "ok", "database": "available"})
 
             categories = client.get("/api/categories")
             self.assertEqual(categories.status_code, 200)
@@ -121,6 +124,25 @@ class EligibilityApiTests(unittest.TestCase):
             })
             self.assertEqual(options.status_code, 200)
             self.assertEqual(options.headers.get("access-control-allow-origin"), "http://localhost:5173")
+
+    def test_database_readiness_returns_sanitized_503_when_database_is_unavailable(self):
+        with TestClient(app) as client:
+            with patch("app.main.engine.connect", side_effect=RuntimeError("private connection details")):
+                response = client.get("/health/ready")
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {"detail": "Database is unavailable"})
+        self.assertNotIn("private connection details", response.text)
+
+    def test_unhandled_api_error_is_generic_and_logged_without_exception_details(self):
+        with TestClient(app) as client:
+            with patch("app.main.answer_question", new=AsyncMock(side_effect=RuntimeError("private path and secret"))):
+                with self.assertLogs("app.main", level="ERROR") as captured:
+                    response = client.post("/api/assistant/chat", json={"message": "hello"})
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json(), {"detail": "An internal server error occurred."})
+        self.assertIn("error_type=RuntimeError", captured.output[0])
+        self.assertNotIn("private path", captured.output[0])
+        self.assertNotIn("secret", captured.output[0])
 
     def test_existing_scheme_api_fields_remain_available(self):
         with TestClient(app) as client:

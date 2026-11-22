@@ -19,6 +19,12 @@ def _database_url() -> str:
     configured = os.getenv("DATABASE_URL")
     if not configured:
         return f"sqlite:///{(BACKEND_DIR / 'nitimitra.db').as_posix()}"
+    # Render has historically supplied postgres:// URLs; SQLAlchemy's psycopg
+    # 3 dialect is explicit so no psycopg2 dependency is needed.
+    if configured.startswith("postgres://"):
+        configured = "postgresql+psycopg://" + configured.removeprefix("postgres://")
+    elif configured.startswith("postgresql://"):
+        configured = "postgresql+psycopg://" + configured.removeprefix("postgresql://")
     if configured.startswith("sqlite:///"):
         configured_path = Path(configured.removeprefix("sqlite:///"))
         if not configured_path.is_absolute():

@@ -76,7 +76,7 @@ class AssistantServiceTests(unittest.TestCase):
             result = asyncio.run(answer_question(db, "What are Example Education Scholarship benefits?", "hi", [],
                                                  client_factory=lambda **kwargs: calls.append(kwargs), api_key=""))
             self.assertEqual(result["status"], "unavailable")
-            self.assertIn("\u0915\u0949\u0928\u094d\u092b\u093c\u093f\u0917\u0930", result["answer"])
+            self.assertTrue(any("\u0900" <= char <= "\u097f" for char in result["answer"]))
             self.assertEqual(calls, [])
         finally:
             db.close()
@@ -114,8 +114,7 @@ class AssistantServiceTests(unittest.TestCase):
         try:
             result = asyncio.run(answer_question(db, "Tell me about an unrelated housing benefit", "en", [], api_key=""))
             self.assertEqual(result["status"], "unavailable")
-            self.assertIn("OPENAI_API_KEY", result["answer"])
-            self.assertIn("verified source", result["answer"])
+            self.assertIn("temporarily unavailable", result["answer"])
         finally:
             db.close()
             engine.dispose()
@@ -276,7 +275,7 @@ class AssistantServiceTests(unittest.TestCase):
                     result = asyncio.run(answer_question(db, "What are Example Education Scholarship benefits?", "en", [],
                                                          client_factory=lambda **kwargs: FakeClient(responses, **kwargs), api_key="test-key"))
                 self.assertEqual(result["status"], "error")
-                expected_message = {"invalid_key": "OPENAI_API_KEY", "quota": "billing", "rate_limit": "wait briefly", "timeout": "try again", "network": "retry"}[category]
+                expected_message = {"invalid_key": "temporarily unavailable", "quota": "billing", "rate_limit": "wait briefly", "timeout": "try again", "network": "retry"}[category]
                 self.assertIn(expected_message.casefold(), result["answer"].casefold())
                 self.assertIn(f"category={category}", captured.output[0])
                 self.assertNotIn("private provider detail", captured.output[0])

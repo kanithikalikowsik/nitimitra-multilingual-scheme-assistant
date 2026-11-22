@@ -248,6 +248,75 @@ Open the local application:
 
 **Note:** Use the dependency installation instructions and environment configuration supplied with the actual project. The backend dependency filename and any required frontend API URL should be checked against the repository before running.
 
+### Backend deployment and database configuration
+
+The backend supports SQLite for local development and PostgreSQL for hosted use. The backend runtime is pinned to Python 3.13 in `backend/.python-version`.
+
+#### Local SQLite
+
+From the repository root, configure the backend environment and start the API:
+
+```powershell
+cd backend
+Copy-Item .env.example .env
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+When `DATABASE_URL` is unset, SQLite stores data in `backend/nitimitra.db`. Local startup keeps the existing additive SQLite compatibility migration and restart-safe demo seeding. Existing rows are preserved.
+
+For a new, empty local database, create the schema with Alembic:
+
+```powershell
+alembic upgrade head
+```
+
+For an existing local SQLite database, start the app once so its legacy compatibility migration can run, inspect and back up the database, then mark the current schema as managed by Alembic:
+
+```powershell
+alembic stamp head
+```
+
+Do not run the initial `upgrade head` against an existing unversioned database. After adoption, create reviewed migrations with `alembic revision --autogenerate -m "describe schema change"` and apply them with `alembic upgrade head`.
+
+#### PostgreSQL and Render
+
+Set `DATABASE_URL` to the PostgreSQL connection URL supplied by the provider. The backend accepts `postgres://` and `postgresql://` URLs and selects the psycopg 3 driver. Keep credentials in the hosting provider's environment settings, never in source control.
+
+Recommended Render Web Service settings:
+
+- **Root Directory:** `backend`
+- **Runtime:** Python 3; `backend/.python-version` pins Python 3.13
+- **Build Command:** `python -m pip install -r requirements.txt`
+- **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Health Check Path:** `/health`
+
+Before starting the service against a new PostgreSQL database, run this once from the Render Shell in the `backend` directory:
+
+```bash
+alembic upgrade head
+```
+
+Apply reviewed Alembic migrations before releases that change the schema. Production startup does not run `create_all` or the SQLite legacy migration. Demo seeding is disabled in production unless `SEED_DEMO_DATA=true` is explicitly set.
+
+Configure these backend environment variables in Render:
+
+| Variable | Production configuration |
+|---|---|
+| `APP_ENV` | `production` |
+| `DATABASE_URL` | Render PostgreSQL connection URL; keep it private |
+| `FRONTEND_ORIGINS` | Exact Vercel origin(s), comma-separated, e.g. `https://your-app.vercel.app` |
+| `OPENAI_API_KEY` | Optional secret setting for AI features; never put this in Vercel or frontend variables |
+| `OPENAI_MODEL` | Optional; defaults to `gpt-5.4-mini` |
+| `OPENAI_TIMEOUT_SECONDS` | Optional; defaults to `20` |
+| `SEED_DEMO_DATA` | Optional; disabled by default in production |
+
+`FRONTEND_ORIGINS` must list each exact Vercel deployment origin that needs access, with no wildcard. Credentialed CORS is disabled. Local development uses the localhost origins when the setting is absent. `GET /health` checks process availability; `GET /health/ready` returns 503 when the database cannot answer a simple query.
+
+The OpenAI key is read only by the backend. Missing or rejected credentials produce generic assistant responses, and provider logs omit error messages that might contain private request details.
+
 ## ◈ API Overview
 
 NitiMitra uses FastAPI to provide backend functionality.
