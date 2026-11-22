@@ -1,193 +1,327 @@
+ <div align="center">
+
 # NitiMitra
 
-**Public scheme information, explained in your language.**
+### Government benefits, explained in your language.
 
-Repository name: `nitimitra-multilingual-scheme-assistant`
+**Making public scheme information easier to discover, understand, and explore.**
 
-NitiMitra is an independent, multilingual civic information project. It provides a searchable interface for scheme records, preliminary eligibility guidance, and a source-aware assistant in English, Telugu, and Hindi.
+<br/>
 
-> NitiMitra is not an official government service. It does not approve or reject applications. Scheme-specific guidance depends on reliable, verified source records being available in the database.
+[![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Type_Safe-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-AI_Integration-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com/)
 
-## The problem
+<br/>
 
-Public benefit information can be spread across many government websites and written in language that is difficult to navigate. Language barriers and unclear eligibility conditions make it harder for people to find and understand the information that applies to them.
+**English · తెలుగు · हिन्दी**
 
-## The solution
+<br/>
 
-NitiMitra brings scheme records and related guidance into one responsive application. It labels illustrative records as demos, uses verified sources for factual scheme guidance, and communicates when information is missing. Eligibility results are preliminary explanations, never official decisions.
+*A multilingual civic information assistant built to make government scheme information more accessible.*
 
-## Features
+</div>
 
-- English, Telugu, and Hindi interface with language preference saved in the browser.
-- Scheme explorer with category filters, search, and detail pages.
-- Backend-backed scheme content with source verification status.
-- Rule-based eligibility questionnaire and condition-by-condition explanations when verified structured rules exist.
-- Document checklist that preserves unknown requirements instead of inventing them.
-- Multilingual assistant with server-side OpenAI integration, verified-source filtering, and source references.
-- Responsive layouts, loading/error/empty states, and route navigation.
-- Questionnaire answers are not stored. Assistant conversation history is temporary in the browser tab and can be cleared.
+---
 
-## Technology
+## ◈ The Vision Behind NitiMitra
 
-| Layer | Tools |
-| --- | --- |
-| Frontend | React 18, Vite, TypeScript, React Router, Tailwind CSS, Lucide |
-| Backend | Python, FastAPI, Pydantic, SQLAlchemy |
-| Database | SQLite by default; another database needs a compatible SQLAlchemy driver and deployment configuration |
-| Assistant | OpenAI Responses API called from the backend only |
+Public welfare schemes can make a meaningful difference in people's lives. However, finding relevant information, understanding eligibility requirements, and identifying the documents needed to apply can be difficult.
 
-## Architecture
+Information is often spread across different websites, presented in complex language, or difficult to understand for people who prefer regional languages.
+
+**NitiMitra brings scheme discovery and preliminary guidance into one accessible digital experience.**
+
+It helps users explore available scheme records, understand eligibility conditions, review document requirements, and interact with an AI-powered multilingual assistant.
+
+> **Our idea is simple:** Public information should be easier to find and easier to understand, regardless of the language a person speaks.
+
+## ◈ Explore NitiMitra
+
+| Feature | What it offers |
+|---|---|
+| 🔎 Scheme Explorer | Search and explore scheme records. |
+| 🗂️ Category Discovery | Browse schemes by their categories. |
+| 📋 Scheme Details | Understand benefits, eligibility and application steps when data is available. |
+| 🎯 Smart Eligibility Checker | Evaluate structured eligibility conditions. |
+| 📑 Document Checklist | Review scheme-specific document requirements when provided. |
+| 🤖 AI Assistant | Ask questions through an AI-powered conversational interface. |
+| 🌐 Multilingual Experience | Navigate in English, Telugu and Hindi. |
+| 🔗 Source Awareness | Distinguish verified information from unverified or demonstration records. |
+
+## ◈ Designed for Everyone
+
+NitiMitra supports three interface languages.
+
+<div align="center">
+
+| English | తెలుగు | हिन्दी |
+|:---:|:---:|:---:|
+| Explore schemes | పథకాలను అన్వేషించండి | योजनाएँ खोजें |
+| Check eligibility | అర్హతను తెలుసుకోండి | पात्रता जाँचें |
+| Ask questions | ప్రశ్నలు అడగండి | सवाल पूछें |
+
+</div>
+
+The language selector allows users to change their interface language. Scheme information remains identified according to the language in which its underlying record is available; unofficial translations are not represented as official government translations.
+
+## ◈ How NitiMitra Works
+
+The application connects a user-friendly frontend with a Python backend, structured scheme information, eligibility evaluation, and AI assistance.
 
 ```mermaid
-flowchart LR
-  Browser[React and TypeScript app] -->|REST and JSON| API[FastAPI service]
-  API --> ORM[SQLAlchemy models and rules]
-  ORM --> DB[(SQLite by default)]
-  API -->|Verified source context only| AI[Optional OpenAI Responses API]
+flowchart TD
+    A["User"] --> B["NitiMitra Web Application"]
+    B --> C["React + TypeScript"]
+    C --> D["FastAPI Backend"]
+
+    D --> E["Scheme Explorer"]
+    D --> F["Eligibility Engine"]
+    D --> G["Source Verification"]
+    D --> H["AI Assistant"]
+
+    E --> I[("Scheme Database")]
+    F --> I
+    G --> I
+    H --> J["OpenAI Responses API"]
+    H --> I
+
+    J --> D
+    I --> D
+    D --> C
+    C --> K["Multilingual User Experience"]
 ```
 
-The API returns scheme records, source status, eligibility results, and assistant responses. Only eligible verified source records are supplied as factual scheme context; model-created URLs are not used as citations. When verified scheme evidence is unavailable, the assistant communicates that limitation rather than treating demo records as confirmed policy.
+## ◈ Technology Behind the Project
 
-## Project structure
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Lucide React
+
+</td>
+<td width="50%" valign="top">
+
+### Backend
+
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Database
+
+- SQLite for local development
+- SQLAlchemy ORM
+- Structured relational records
+
+</td>
+<td width="50%" valign="top">
+
+### AI Integration
+
+- Official OpenAI Python SDK
+- OpenAI Responses API
+- Backend-side AI integration
+
+</td>
+</tr>
+</table>
+
+## ◈ Project Structure
 
 ```text
-backend/
-  app/              FastAPI routes, models, migrations, seeding, eligibility, assistant
-  tests/            Backend tests
-  requirements.txt  Python dependencies
-frontend/
-  src/              Pages, components, translations, API service, styles
-  scripts/          Route, translation, and assistant smoke checks
-  package.json      Frontend scripts and dependencies
+NitiMitra/
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── models/
+│   │   ├── routes/
+│   │   └── ...
+│   ├── .env.example
+│   └── ...
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── data/
+│   │   └── lib/
+│   └── ...
+│
+├── docs/
+│   └── screenshots/
+│
+├── .gitignore
+├── README.md
+└── spec.md
 ```
 
-## Requirements
+*The folder tree is a simplified overview. Refer to the repository for the complete structure.*
 
-- Node.js 20 or newer and npm.
-- Python 3.10 or newer.
+## ◈ Run NitiMitra Locally
 
-## Run locally
+Want to explore or contribute to NitiMitra? Follow these steps.
 
-Run the backend and frontend in separate terminals.
+### Prerequisites
 
-### 1. Backend
+- Python
+- Node.js and npm
+- Git
+- An OpenAI API key for live AI functionality
 
-From the repository root, in Windows PowerShell:
+### 1. Clone the repository
 
-```powershell
-cd .\backend
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-Copy-Item .env.example .env
+```bash
+git clone https://github.com/kanithikalikowsik/nitimitra-multilingual-scheme-assistant.git
+
+cd nitimitra-multilingual-scheme-assistant
 ```
 
-Edit `backend/.env` and replace the placeholders with local values. For a typical local run, use `sqlite:///./nitimitra.db` for `DATABASE_URL`, `http://localhost:5173,http://127.0.0.1:5173` for `FRONTEND_ORIGINS`, `gpt-5.4-mini` for `OPENAI_MODEL`, and `20` for `OPENAI_TIMEOUT_SECONDS`. `OPENAI_API_KEY` is optional for general local use; leave it blank when not configured. If you enable the provider, put your key only in this backend file. Do not put it in `frontend/.env` or commit either `.env` file.
-
-Start the API:
+### 2. Configure the backend
 
 ```powershell
-python -m app.seed
+cd backend
+
+python -m venv .venv
+
+.venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+Configure your local `backend/.env` file using the project's `.env.example` as a reference.
+
+Example:
+
+```env
+OPENAI_API_KEY=your_actual_api_key
+OPENAI_MODEL=gpt-5.4-mini
+OPENAI_TIMEOUT_SECONDS=30
+```
+
+Never commit your actual `.env` file or API key.
+
+Start the backend:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-The API initializes the schema and runs idempotent demo seeding on startup. The seed records are illustrative placeholders, not government schemes. The local database is created under `backend/` by default and is excluded from Git.
+Backend API documentation:
 
-### 2. Frontend
+`http://localhost:8000/docs`
 
-In a second terminal, from the repository root:
+### 3. Start the frontend
 
-```powershell
-cd .\frontend
-npm ci
-Copy-Item .env.example .env
+Open a second terminal:
+
+```bash
+cd frontend
+
+npm install
+
 npm run dev
 ```
 
-Set `VITE_API_BASE_URL` in `frontend/.env` to `http://localhost:8000`, then open the local URL printed by Vite, normally <http://localhost:5173>. This frontend setting is public configuration, not a place for secrets.
+Open the local application:
 
-For macOS/Linux, create the virtual environment with `python3 -m venv .venv`, activate it with `source .venv/bin/activate`, and use `cp .env.example .env` in each project directory.
+`http://localhost:5173`
 
-### Environment variables
+**Note:** Use the dependency installation instructions and environment configuration supplied with the actual project. The backend dependency filename and any required frontend API URL should be checked against the repository before running.
 
-| Variable | Location | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | `backend/.env` | SQLAlchemy database URL; defaults to the local SQLite database. |
-| `FRONTEND_ORIGINS` | `backend/.env` | Comma-separated browser origins allowed by development CORS. Set the deployed frontend origin before production. |
-| `OPENAI_API_KEY` | `backend/.env` only | Optional provider credential. Use your own key locally; never commit it or share it. |
-| `OPENAI_MODEL` | `backend/.env` | Optional model name; defaults to the configured application default. |
-| `OPENAI_TIMEOUT_SECONDS` | `backend/.env` | Provider request timeout. |
-| `VITE_API_BASE_URL` | `frontend/.env` | Backend base URL, normally `http://localhost:8000`. This value is public configuration, not a secret. |
+## ◈ API Overview
 
-The `.env.example` files contain placeholders only. Replace them in your private `.env` files; do not put real credentials in example files.
+NitiMitra uses FastAPI to provide backend functionality.
 
-## API overview
+| API area | Purpose |
+|---|---|
+| Health | Backend availability |
+| Categories | Available scheme categories |
+| Schemes | Listing, searching and filtering |
+| Scheme Details | Retrieve an individual scheme |
+| Eligibility | Questionnaire and eligibility evaluation |
+| Assistant | AI-powered question and answer interface |
 
-The API is served locally at `http://localhost:8000`. Interactive documentation is available at `/docs`.
+For the exact paths, request methods, and schemas, open the locally running API documentation at `/docs`.
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/health` | Service health check |
-| `GET` | `/api/categories` | Categories and scheme counts |
-| `GET` | `/api/schemes` | Scheme list; optional `category` filter |
-| `GET` | `/api/schemes/search?q=...` | Search; optional `category` filter |
-| `GET` | `/api/schemes/{scheme_id}` | Scheme lookup by numeric ID |
-| `GET` | `/api/schemes/slug/{slug}` | Scheme lookup by slug |
-| `GET` | `/api/schemes/slug/{slug}/eligibility` | Questionnaire generated from available verified rules |
-| `POST` | `/api/schemes/slug/{slug}/eligibility-check` | Evaluate submitted answers without storing them |
-| `POST` | `/api/assistant/chat` | Multilingual assistant response and database-backed source references |
+## ◈ Trust, Privacy & Information Reliability
 
-## Database and scheme data
+NitiMitra is designed with an important principle: **an answer should not be presented as verified government information without reliable supporting evidence.**
 
-SQLAlchemy models cover schemes, sources, eligibility rules, documents, and application steps. SQLite is the default for local development. Startup migrations are additive, and seeding is designed to preserve existing records.
+The project includes safeguards intended to:
 
-The database file is local state and must not be uploaded. The repository does not include an authoritative scheme database. Seeded category entries are explicitly marked illustrative demo placeholders. Scheme-specific guidance should be treated as unavailable until reliable official source information has been reviewed and recorded with verification status and date. Never mark a source verified without checking it.
+- Distinguish verified sources from unverified records.
+- Avoid treating demonstration information as official information.
+- Evaluate eligibility only when supported by structured criteria.
+- Avoid inventing official URLs or unsupported requirements.
+- Keep OpenAI credentials on the backend.
+- Handle unavailable information transparently.
 
-## Checks
+**Current data limitation:** The development database has contained demonstration scheme information and no verified official source records in the latest recorded QA results. The availability of verified scheme-specific guidance therefore depends on adding and validating reliable source records.
 
-Frontend checks, from `frontend/`:
+## ◈ Project Status
 
-```powershell
-npm run typecheck
-npm run i18ncheck
-npm run routecheck
-npm run assistantcheck
-npm run build
-```
+NitiMitra has completed its main implementation and automated quality-assurance phases.
 
-Backend tests, from `backend/` with the virtual environment active:
+The project has included frontend, backend, multilingual support, eligibility evaluation, and AI integration work.
 
-```powershell
-python -m unittest discover -s tests -v
-```
+Actual live AI availability, verified scheme-data coverage, and production deployment must be evaluated separately. Passing automated tests does not by itself establish that every production feature is live.
 
-## Screenshots
+## ◈ Future Possibilities
 
-Screenshots can be added under `docs/screenshots/` before release. No screenshots are included yet.
+NitiMitra can continue evolving through:
 
-| Page | Screenshot |
-| --- | --- |
-| Home | Add screenshot |
-| Scheme explorer | Add screenshot |
-| Scheme details | Add screenshot |
-| Eligibility checker | Add screenshot |
-| Assistant | Add screenshot |
+- Broader verified government scheme coverage.
+- More Indian regional languages.
+- Side-by-side scheme comparison.
+- Improved accessibility for different user groups.
+- More comprehensive document guidance.
+- Production analytics and reliability improvements.
+- Additional verified government information sources.
 
-## Current limitations
+## ◈ Why This Project Matters
 
-- The bundled seed content is demo-only; verified scheme records are not included.
-- Scheme-specific AI guidance requires relevant verified source data and a working provider configuration. Provider availability, credentials, quota, or network access can prevent a model response.
-- SQLite is intended for local development. Production database, hosting, monitoring, and CORS configuration require deployment-specific setup.
-- This project does not submit applications, connect to government citizen databases, verify identity, or make eligibility decisions.
-- No license has been added. Add a license before publishing if you intend to grant reuse rights.
+Technology is most meaningful when it helps people solve real problems.
 
-## Future enhancements
+NitiMitra explores how modern web technologies and multilingual AI assistance can make public information easier to understand and navigate.
 
-- Add carefully reviewed scheme records with official source URLs, verification dates, and sourced translations.
-- Add a production database and deployment configuration with restricted CORS origins and secret management.
-- Expand automated accessibility and browser coverage.
-- Improve source review and update workflows.
+The objective is not to replace official government portals, but to help people better understand the information available through reliable sources.
 
-## Disclaimer
+---
 
-NitiMitra is an independent informational project and is not affiliated with, endorsed by, or operated by any government department. Its content is general guidance, not legal advice or an official eligibility decision. Scheme details can change. Verify current requirements with the relevant official government source before acting.
+<div align="center">
+
+## Built with purpose. Designed for accessibility. Powered by technology.
+
+**NitiMitra**
+
+*Government benefits, explained in your language.*
+
+<br/>
+
+[![GitHub Repository](https://img.shields.io/badge/Explore-Source_Code-17324D?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kanithikalikowsik/nitimitra-multilingual-scheme-assistant)
+
+<br/>
+
+**An independent civic-tech project. Not affiliated with any government department.**
+
+</div>
